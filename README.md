@@ -1,1 +1,1 @@
-# steganography
+# steganograpy
