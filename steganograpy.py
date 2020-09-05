@@ -9,12 +9,13 @@ from math import sqrt, ceil
 from PIL import Image
 
 
-# @message is a string
-# @filename is a
+# ENCODING
 def create_img(message, filename):
     '''
-    Hello
-    Will not work for a perfectly green image?
+
+    :param message:
+    :param filename:
+    :return:
     '''
     # Determine the minimum pixel size of the image needed to encode the message (based on message length)
     # Every character in message requires 8-bits
@@ -42,10 +43,56 @@ def create_img(message, filename):
     img.close()
 
 
-# @message is string of text
 def dispense_bits(message):
+    '''
+
+    :param message:
+    :return:
+    '''
     # For every character in the message
     # (e.g. for the first character in the message "Hello World", it will give the unicode value of "H" which is 72)
     for char in message:
         # Assigns the variable 'unicode_value' with the
-        unicode_value: int = ord()
+        unicode_value: int = ord(char)
+        # Generates list of powers to use with 2 to map 2^7 (i.e. 128) to 0
+        for power in range(7,-1,-1):
+            # Yield generates the binary bits (TEMPORARY)
+            # Yields the binary value of 1 if the unicode value matches with 2^ power value of the current iteration
+            # Yields the binary value of 0 if it does not match
+            yield 1 if unicode_value & 2 ** power else 0
+
+
+# DECODING
+def dispense_chars(bits):
+    '''
+
+
+    :param bits:
+    :return:
+    '''
+    byte = 0
+    for index, bit in enumerate(bits):
+        power = 7-index % 8
+        if bit:
+            byte |= 2** power
+        # At the end of each 8 bits (when the power goes down to zero)
+        if power == 0:
+            # Gives the respective unicode value, given the byte
+            char: str = chr(byte)
+            if not char.isprintable() and char != '\n':
+                return
+            yield char
+            byte = 0
+
+
+def decode_img(filename):
+    '''
+
+    :param filename:
+    :return:
+    '''
+    img = Image.open(filename)
+    # Extract red values from image and hand data to dispense_chars() function
+    decoded = ''.join(dispense_chars(img.getdata(band=0)))
+    img.close()
+    return decoded
